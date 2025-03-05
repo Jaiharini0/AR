@@ -1,81 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <title>Solar System WebAR</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
-</head>
-<body style="margin: 0; overflow: hidden;">
-
+  </head>
+  <body>
     <a-scene embedded arjs>
-        <a-assets>
-            <a-asset-item id="solarModel" src="https://jaiharini0.github.io/AR/post.glb"></a-asset-item>
-        </a-assets>
+      <a-entity 
+        id="solarSystem" 
+        gltf-model="post.glb"
+        position="0 1 -3"
+        scale="0.5 0.5 0.5"
+        gesture-controls>
+      </a-entity>
 
-        <!-- Solar System Model -->
-        <a-entity 
-            id="solarSystem" 
-            gltf-model="#solarModel" 
-            position="0 1 -3"
-            scale="0.5 0.5 0.5"
-            gesture-controls>
-        </a-entity>
-
-        <!-- Camera + Cursor -->
-        <a-camera position="0 1.6 0">
-            <a-cursor></a-cursor>
-        </a-camera>
+      <a-camera position="0 1.6 0">
+        <a-cursor></a-cursor>
+      </a-camera>
     </a-scene>
 
     <script>
-        AFRAME.registerComponent('gesture-controls', {
-            init: function () {
-                let el = this.el;
-                let startX, startY, startScale = 1;
-                let isPinching = false, initialDistance = 0;
+      AFRAME.registerComponent('gesture-controls', {
+        init: function () {
+          let el = this.el;
+          let startX, startY;
 
-                // Touch Start Event
-                el.sceneEl.addEventListener('touchstart', function (event) {
-                    if (event.touches.length === 1) {
-                        startX = event.touches[0].clientX;
-                        startY = event.touches[0].clientY;
-                    }
-                    if (event.touches.length === 2) {
-                        isPinching = true;
-                        let dx = event.touches[0].clientX - event.touches[1].clientX;
-                        let dy = event.touches[0].clientY - event.touches[1].clientY;
-                        initialDistance = Math.sqrt(dx * dx + dy * dy);
-                    }
-                });
+          el.sceneEl.addEventListener('touchstart', function (event) {
+            startX = event.touches[0].clientX;
+            startY = event.touches[0].clientY;
+          });
 
-                // Touch Move Event
-                el.sceneEl.addEventListener('touchmove', function (event) {
-                    if (isPinching && event.touches.length === 2) {
-                        let dx = event.touches[0].clientX - event.touches[1].clientX;
-                        let dy = event.touches[0].clientY - event.touches[1].clientY;
-                        let newDistance = Math.sqrt(dx * dx + dy * dy);
-                        let scaleChange = newDistance / initialDistance;
-                        el.object3D.scale.set(scaleChange, scaleChange, scaleChange);
-                    } else if (event.touches.length === 1) {
-                        let deltaX = event.touches[0].clientX - startX;
-                        el.object3D.rotation.y += deltaX * 0.005;
-                        startX = event.touches[0].clientX;
-                    }
-                });
+          el.sceneEl.addEventListener('touchmove', function (event) {
+            let deltaX = event.touches[0].clientX - startX;
+            el.object3D.rotation.y += deltaX * 0.001;
+            startX = event.touches[0].clientX;
+          });
 
-                // Touch End Event
-                el.sceneEl.addEventListener('touchend', function () {
-                    isPinching = false;
-                });
-
-                // Tap Event (for showing info)
-                el.sceneEl.addEventListener('click', function () {
-                    alert("You tapped on the solar system!");
-                });
-            }
-        });
+          el.sceneEl.addEventListener('click', function () {
+            alert("You tapped on the solar system!");
+          });
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
