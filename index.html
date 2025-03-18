@@ -1,59 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar System WebAR</title>
-    
-    <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/ar.js/aframe/build/aframe-ar.min.js"></script>
-  </head>
-  <body>
+</head>
+<body>
     <a-scene embedded arjs>
-      <a-assets>
-       <a-asset-item id="solarModel" src="https://raw.githubusercontent.com/Jaiharini0/AR/main/post.glb"></a-asset-item>
-      </a-assets>
+        <a-assets>
+            <!-- 3D Model -->
+            <a-asset-item id="solarModel" src="https://raw.githubusercontent.com/Jaiharini0/AR/main/post.glb"></a-asset-item>
 
-      <a-entity 
-        id="solarSystem" 
-        gltf-model="https://raw.githubusercontent.com/Jaiharini0/AR/main/post.glb" 
-        position="0 1 -3"
-        scale="5 5 5"
-        gesture-controls>
-      </a-entity>
+            <!-- Audio Files -->
+            <audio id="earth-audio" src="earth.mp3"></audio>
+            <audio id="mars-audio" src="mars.mp3"></audio>
+        </a-assets>
 
-      <a-camera position="0 1.6 0">
-        <a-cursor></a-cursor>
-      </a-camera>
+        <!-- Solar System Model -->
+        <a-entity 
+            id="solarSystem" 
+            gltf-model="#solarModel" 
+            position="0 1 -3" 
+            scale="5 5 5"
+            gesture-controls>
+        </a-entity>
+
+        <!-- Planets (Clickable for Voice) -->
+        <a-entity id="earth" position="-1 1.5 -3" sound="src: #earth-audio; autoplay: false">
+            <a-sphere radius="0.3" color="blue"></a-sphere>
+            <a-entity position="0 0.5 0" text="value: Tap Earth to hear about it;"></a-entity>
+        </a-entity>
+
+        <a-entity id="mars" position="1 1.5 -3" sound="src: #mars-audio; autoplay: false">
+            <a-sphere radius="0.3" color="red"></a-sphere>
+            <a-entity position="0 0.5 0" text="value: Tap Mars to hear about it;"></a-entity>
+        </a-entity>
+
+        <!-- Camera -->
+        <a-camera position="0 1.6 0">
+            <a-cursor></a-cursor>
+        </a-camera>
     </a-scene>
 
     <script>
-      AFRAME.registerComponent('gesture-controls', {
-        init: function () {
-          let el = this.el;
-          let startX, startY;
+        // Register gesture controls component
+        AFRAME.registerComponent('gesture-controls', {
+            init: function () {
+                let el = this.el;
+                let startX, startY;
 
-          el.sceneEl.addEventListener('touchstart', function (event) {
-            startX = event.touches[0].clientX;
-            startY = event.touches[0].clientY;
-          });
+                // Detect finger press
+                el.sceneEl.addEventListener('touchstart', function (event) {
+                    startX = event.touches[0].clientX;
+                    startY = event.touches[0].clientY;
+                });
 
-          el.sceneEl.addEventListener('touchmove', function (event) {
-            let deltaX = event.touches[0].clientX - startX;
-            el.object3D.rotation.y += deltaX * 0.001;
-            startX = event.touches[0].clientX;
-          });
+                // Detect finger movement for rotation
+                el.sceneEl.addEventListener('touchmove', function (event) {
+                    let deltaX = event.touches[0].clientX - startX;
+                    el.object3D.rotation.y += deltaX * 0.001;
+                    startX = event.touches[0].clientX;
+                });
 
-          el.sceneEl.addEventListener('click', function () {
-            alert("You tapped on the solar system!");
-          });
+                // Detect taps (click event) on the Solar System
+                el.sceneEl.addEventListener('click', function () {
+                    alert("You tapped on the solar system!");
+                });
+            }
+        });
 
-          el.addEventListener('model-loaded', function () {
-            console.log("Model loaded successfully!");
-          });
-        }
-      });
+        // Play audio when planets are clicked
+        document.querySelector("#earth").addEventListener("click", function() {
+            this.components.sound.playSound();
+        });
+
+        document.querySelector("#mars").addEventListener("click", function() {
+            this.components.sound.playSound();
+        });
     </script>
-  </body>
+</body>
 </html>
