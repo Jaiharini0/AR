@@ -17,6 +17,9 @@
             <audio id="mars-audio" src="mars.mp3"></audio>
         </a-assets>
 
+        <a-animation attribute="scale" to="1.2 1.2 1.2" dur="500" begin="click"></a-animation>
+        <a-animation attribute="scale" to="1 1 1" dur="500" begin="sound-ended"></a-animation>
+
         <!-- Solar System Model -->
         <a-entity 
             id="solarSystem" 
