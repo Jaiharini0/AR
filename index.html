@@ -3,59 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar System WebAR</title>
-
-    <!-- A-Frame & AR.js -->
+    <title>AR Model Viewer</title>
+    
+    <!-- Load A-Frame and AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/ar.js@1.7.2/aframe/build/aframe-ar.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
     
+    <!-- Check if AR is supported -->
+    <noscript>
+        <h2 style="color: red; text-align: center;">JavaScript is required to run this AR experience.</h2>
+    </noscript>
+
     <a-scene embedded arjs>
-        
-        <!-- Camera -->
-        <a-camera position="0 1.6 0" look-controls></a-camera>
-
-        <!-- Solar System Model -->
-        <a-entity id="solar-system" position="0 0 -5" gltf-model="https://raw.githubusercontent.com/jaiharini0.github.io/AR/main/post.glb"></a-entity>
-
-        <!-- Audio Assets -->
+        <!-- Load Assets -->
         <a-assets>
-            <audio id="mercuryAudio" src="mercury.mp3"></audio>
-            <audio id="venusAudio" src="venus.mp3"></audio>
-            <audio id="earthAudio" src="earth.mp3"></audio>
-            <audio id="marsAudio" src="mars.mp3"></audio>
-            <audio id="jupiterAudio" src="jupiter.mp3"></audio>
-            <audio id="saturnAudio" src="saturn.mp3"></audio>
-            <audio id="uranusAudio" src="uranus.mp3"></audio>
-            <audio id="neptuneAudio" src="neptune.mp3"></audio>
+            <a-asset-item id="model" src="post.glb"></a-asset-item>
         </a-assets>
 
+        <!-- Add Lighting for Better Visibility -->
+        <a-light type="directional" position="1 1 1" intensity="0.8"></a-light>
+        <a-light type="ambient" intensity="0.5"></a-light>
+
+        <!-- Load 3D Model -->
+        <a-gltf-model src="#model" position="0 0 0" scale="0.5 0.5 0.5"></a-gltf-model>
+
+        <!-- Marker Detection -->
+        <a-marker-camera preset="hiro"></a-marker-camera>
     </a-scene>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                console.log("Requesting camera access...");
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(() => console.log("Camera access granted"))
-                    .catch(() => alert("Camera access denied. Enable camera in browser settings."));
-            }
-
-            // List of all planets for interactions
-            const planets = ["mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"];
-
-            planets.forEach(planet => {
-                const planetEntity = document.getElementById(planet);
-                if (planetEntity) {
-                    planetEntity.addEventListener('click', () => {
-                        document.getElementById(`${planet}Audio`).play();
-                        planetEntity.setAttribute('animation', "property: scale; to: 1.2 1.2 1.2; dur: 800; startEvents: click");
-                    });
-                }
-            });
-        });
-    </script>
 
 </body>
 </html>
