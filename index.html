@@ -3,46 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Model Viewer</title>
-    
-    <!-- Load A-Frame and AR.js -->
-    <script src="https://unpkg.com/ar.js@1.7.2/aframe/build/aframe-ar.min.js"></script>
+    <title>WebAR Model Viewer</title>
+
+    <!-- Load A-Frame with WebXR support -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@1.0.0/aframe/build/aframe-ar.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
     
-    <!-- Check if AR is supported -->
     <noscript>
         <h2 style="color: red; text-align: center;">JavaScript is required to run this AR experience.</h2>
     </noscript>
 
-    <a-scene embedded arjs>
+    <a-scene 
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        xr-mode-ui="enabled: true">
+
         <!-- Load Assets -->
         <a-assets>
             <a-asset-item id="model" src="post.glb"></a-asset-item>
         </a-assets>
 
-        <!-- Add Lighting for Better Visibility -->
-        <a-light type="directional" position="1 1 1" intensity="0.8"></a-light>
+        <!-- Lighting -->
+        <a-light type="directional" position="1 2 1" intensity="0.8"></a-light>
         <a-light type="ambient" intensity="0.5"></a-light>
 
-        <!-- Load 3D Model -->
-        <a-gltf-model 
-        src="#model" 
-        position="0 0 0" 
-        scale="0.5 0.5 0.5" 
-        rotation="0 180 0"
-        animation-mixer
-        visible="true" 
-        shadow="receive: true; cast: true"
-        onerror="console.log('GLTF Model Load Error:', event);">
-        </a-gltf-model>
+        <!-- 3D Model (WebAR Markerless) -->
+        <a-entity 
+            id="solarSystem"
+            gltf-model="#model" 
+            position="0 0 -2" 
+            scale="0.5 0.5 0.5" 
+            rotation="0 180 0"
+            animation-mixer
+            shadow="receive: true; cast: true">
+        </a-entity>
 
-
-
-        <!-- Marker Detection -->
-        <a-marker-camera preset="hiro"></a-marker-camera>
+        <!-- AR Camera -->
+        <a-camera position="0 1.6 0"></a-camera>
+        
     </a-scene>
 
+    <script>
+        const model = document.querySelector('#solarSystem');
+        let scale = 0.5;
+        let rotation = { x: 0, y: 180 };
+
+        // Pinch to Zoom
+        let initialDistance = null;
+        window.addEventListener("touchmove", (event) => {
+            if (event.touches.length === 2) {
+                const dist = Math.hypot(
+                    event.touches[0].clientX - event.touches[1].clientX,
+                    event.touches[0].clientY - event.touches[1].clientY
+                );
+                if (!initialDistance) initialDistance = dist;
+                let scaleFactor = dist / initialDistance;
+                scale = Math.min(Math.max(0.3, scale * scaleFactor), 2);
+                model.setAttribute("scale", `${scale} ${scale} ${scale}`);
+                initialDistance = dist;
+            }
+        });
+        window.addEventListener("touchend", () => initialDistance = null);
+
+        // Swipe to Rotate
+        let startX = null;
+        window.addEventListener("touchstart", (event) => {
+            if (event.touches.length === 1) {
+                startX = event.touches[0].clientX;
+            }
+        });
+        window.addEventListener("touchmove", (event) => {
+            if (event.touches.length === 1 && startX !== null) {
+                let deltaX = event.touches[0].clientX - startX;
+                rotation.y += deltaX * 0.2;
+                model.setAttribute("rotation", `${rotation.x} ${rotation.y} 0`);
+                startX = event.touches[0].clientX;
+            }
+        });
+        window.addEventListener("touchend", () => startX = null);
+
+        // Tap for Info + Voice Narration
+        model.addEventListener("click", () => {
+            alert("This is a solar system model. Explore the planets!");
+            let speech = new SpeechSynthesisUtterance("This is a solar system model. Explore the planets!");
+            window.speechSynthesis.speak(speech);
+        });
+    </script>
 </body>
 </html>
